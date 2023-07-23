@@ -1,0 +1,17 @@
+{
+    "name": "app/classic-trader",
+    "autoload": {
+        "psr-4": {
+            "App\\ClassicTrader\\": "api/src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "k4rz4",
+            "email": "karzicmarko@gmail.com"
+        }
+    ],
+    "require": {
+        "monolog/monolog": "^3.4"
+    }
+}
