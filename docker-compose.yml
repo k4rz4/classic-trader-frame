@@ -5,17 +5,15 @@ services:
       context: .
     ports:
       - "8080:80"
-    volumes:
-      - .:/var/www/html
     links:
-      - db
+     - db
   db:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: your_database
-      MYSQL_USER: your_username
-      MYSQL_PASSWORD: your_password
+      MYSQL_DATABASE: classic-trader
+      MYSQL_USER: cltr
+      MYSQL_PASSWORD: cltr
     volumes:
-      - ./data:/var/lib/mysql
+      - /var/lib/mysql
