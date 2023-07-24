@@ -1,90 +1,52 @@
 <?php
+
 namespace App\ClassicTrader\Http;
+
+use Exception;
+use App\ClassicTrader\Http\Request;
 
 class Router
 {
-    private IRequest $request;
-    private $supportedHttpMethods = array("GET","POST");
+    private Request $request;
+    private array $routes = [];
 
-    public function __construct(IRequest $request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
 
-    public function __call($name, $args)
+    public function get(string $route, string $controllerAction)
     {
-        list($route, $method) = $args;
-        if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
-            $this->invalidMethodHandler();
-        }
-
-        $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
+        $this->routes['GET'][$this->formatRoute($route)] = $controllerAction;
     }
 
-    private function formatRoute($route)
+    public function post(string $route, string $controllerAction)
     {
-        $result = rtrim($route, '/');
-        if ($result === '') {
-            return '/';
-        }
-        return $result;
+        $this->routes['POST'][$this->formatRoute($route)] = $controllerAction;
     }
 
-    private function invalidMethodHandler()
-    {
-        header("{$this->request->serverProtocol} 405 Method Not Allowed");
-    }
-
-    private function defaultRequestHandler()
-    {
-        header("{$this->request->serverProtocol} 404 Not Found");
-    }
+    // // Add other methods for different HTTP methods (e.g., put, delete, etc.)...
 
     public function resolve()
     {
-        $controllerAction = null;
+        $method = $this->request->getMethod();
+        $uri = $this->request->getUri();
 
-        if (isset($this->{strtolower($this->request->requestMethod)})) {
-            $methodDictionary = $this->{strtolower($this->request->requestMethod)};
-        } else {
-            $this->invalidMethodHandler();
-            return;
+        foreach ($this->routes[$method] as $route => $controllerAction) {
+            $pattern = preg_replace('#\{([a-z]+)\}#', '(?<$1>[^/]+)', $route);
+            if (preg_match('#^' . $pattern . '$#', $uri, $matches)) {
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+                $this->request->setParams($params);
+                return $controllerAction;
+            }
         }
 
-        $formatedRoute = $this->formatRoute($this->request->requestUri);
-
-        if (array_key_exists($formatedRoute, $methodDictionary)) {
-            $controllerAction = $methodDictionary[$formatedRoute];
-        }
-
-        if (is_null($controllerAction)) {
-            $this->defaultRequestHandler();
-            return;
-        }
-
-        $controllerActionArr = explode("@", $controllerAction);
-        $controller = $controllerActionArr[0];
-        $method = $controllerActionArr[1];
-        $controller = $this->loadController($controller);
-
-        echo call_user_func_array([$controller, $method], array($this->request));
+        // Handle the 404 error 
+        return null;
     }
 
-    public function loadController($name)
+    private function formatRoute(string $route): string
     {
-        $controller = new $name;
-        
-        return $controller;
-    }
-
-    /* TODO Odvoji routes u poseban fajl
-     public function getRoutes()
-     {
-         require (ROOT . 'routes/routes.php');
-     } */
-
-    public function __destruct()
-    {
-        $this->resolve();
+        return rtrim($route, '/');
     }
 }

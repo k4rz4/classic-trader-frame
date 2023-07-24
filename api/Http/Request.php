@@ -3,41 +3,68 @@ namespace App\ClassicTrader\Http;
 
 class Request implements IRequest
 {
-  function __construct()
-  {
-    $this->bootstrapSelf();
-  }
+    private array $serverParams;
+    private array $queryParams;
+    private array $headers;
+    private string $method;
+    private string $uri;
+    private $body;
 
-  private function bootstrapSelf()
-  {
-    foreach($_SERVER as $key => $value) {
-      $this->{$this->toCamelCase($key)} = $value;
+    private array $params = [];
+
+    public function __construct()
+    {
+        $this->serverParams = $_SERVER;
+        $this->queryParams = $_GET;
+        $this->headers = getallheaders();
+        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->uri = $_SERVER['REQUEST_URI'];
+        $this->body = $this->getParsedBody();
     }
-  }
 
-  private function toCamelCase($string)
-  {
-    $result = strtolower($string);
-
-    preg_match_all('/_[a-z]/', $result, $matches);
-    foreach($matches[0] as $match) {
-      $c = str_replace('_', '', strtoupper($match));
-      $result = str_replace($match, $c, $result);
+    public function setParams(array $params): void
+    {
+        $this->params = $params;
     }
-    return $result;
-  }
 
-  public function getBody(){
-    switch($this->requestMethod) {
-        case "POST":
-            $body = array();
-            $json = file_get_contents('php://input');
-            $obj = json_decode($json);
-            $body = $obj;
-            return $body;
-        default:
-            return;
+    public function getParams(): array
+    {
+        return $this->params;
     }
-  }
+    
+    private function getParsedBody()
+    {
+        if ($this->method === 'POST') {
+            $body = file_get_contents('php://input');
+            return json_decode($body, true);
+        }
+
+        return null;
+    }
+
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    //Nnot working currently rework at some point
+    public function getQueryParams(): array
+    {
+        return $this->queryParams;
+    }
 }
-
