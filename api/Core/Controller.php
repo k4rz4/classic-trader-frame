@@ -2,57 +2,49 @@
 
 namespace App\ClassicTrader\Core;
 
-use Exception;
+use Psr\Http\Message\ResponseInterface;
+use App\ClassicTrader\Core\Logger;
+use App\ClassicTrader\Http\Response;
 
-class Controller
+abstract class Controller
 {
-    protected $statusCode = 200;
+    protected Logger $logger;
+    protected Response $response;
 
-    public function __construct() {
-        // Empty constructor for future use
-    }
-
-    public function setStatusCode(int $statusCode)
+    public function __construct(Logger $logger, Response $response)
     {
-        $this->statusCode = $statusCode;
-
-        return $this;
+        $this->logger = $logger;
+        $this->response = $response;
+        $this->initialize();
     }
 
-    public function getStatusCode(): int
+    protected function initialize()
     {
-        return $this->statusCode;
+        // This method can be overridden by subclasses
     }
 
-    public function jsonResponse(array $data, int $statusCode = null)
+    protected function jsonResponse(array $data, int $statusCode = 200): Response
     {
-        header('Content-Type: application/json');
+        $this->response = $this->response->withStatus($statusCode)
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody(json_encode(['status' => $statusCode, 'data' => $data]));
 
-        if ($statusCode) {
-            $this->setStatusCode($statusCode);
-        }
-
-        http_response_code($this->getStatusCode());
-
-        echo json_encode(['status' => $this->getStatusCode(), 'data' => $data]);
-
-        exit();
+    return $this->response;
     }
 
-    public function jsonSuccess($data)
+    protected function jsonSuccess($data): Response
     {
         return $this->jsonResponse($data, 200);
     }
 
-    public function jsonError($message, $statusCode = 500)
+    protected function jsonError($message, $statusCode = 500): Response
     {
         return $this->jsonResponse(['message' => $message], $statusCode);
     }
 
-
-    public function handleException(\Exception $e) 
+    public function handleException(\Exception $e): void
     {
         $this->logger->error('Uncaught exception: ' . $e->getMessage());
-        $this->jsonError(500, 'An unexpected error occurred');
+        $this->jsonError('An unexpected error occurred', 500);
     }
 }

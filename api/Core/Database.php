@@ -7,36 +7,14 @@ use PDOException;
 
 class Database
 {
-    private static $host;
-    private static $user;
-    private static $password;
-    private static $database;
-    private $conn;
+    private PDO $conn;
 
-    public function __construct(string $host, string $database, string $user, string $password)
+    public function __construct(PDO $conn)
     {
-        self::$host = $host;
-        self::$user = $user;
-        self::$password = $password;
-        self::$database = $database;
-        $this->connect();
+        $this->conn = $conn;
     }
 
-    private function connect()
-    {
-        try {
-            $this->conn = new PDO(
-                "mysql:host=" . self::$host . ";dbname=" . self::$database . ";charset=utf8",
-                self::$user,
-                self::$password,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-            );
-        } catch (PDOException $e) {
-            throw new Exception("Failed to connect to MySQL: " . $e->getMessage());
-        }
-    }
-
-    public function get(string $table, array $fields = ["*"], array $where = [])
+    public function get(string $table, array $fields = ["*"], array $where = []): array
     {
         $sql = "SELECT " . implode(",", $fields) . " FROM " . $table;
 
@@ -60,7 +38,7 @@ class Database
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getCount(string $table, string $field, array $where = [])
+    public function getCount(string $table, string $field, array $where = []): ?int
     {
         $sql = "SELECT COUNT(" . $field . ") as count FROM " . $table;
 
@@ -86,7 +64,7 @@ class Database
         return $result['count'] ?? null;
     }
 
-    public function getDistinct(string $table, string $field)
+    public function getDistinct(string $table, string $field): array
     {
         $sql = "SELECT DISTINCT " . $field . " FROM " . $table;
         $stmt = $this->conn->prepare($sql);
@@ -96,7 +74,7 @@ class Database
         return $result;
     }
 
-    public function insert(string $table, array $data)
+    public function insert(string $table, array $data): string
     {
         $fields = array_keys($data);
         $placeholders = array_fill(0, count($fields), '?');
@@ -109,7 +87,7 @@ class Database
         return $this->conn->lastInsertId();
     }
 
-    public function update(string $table, array $data, array $where)
+    public function update(string $table, array $data, array $where): void
     {
         $setPart = [];
         foreach ($data as $key => $value) {
@@ -127,5 +105,3 @@ class Database
         $stmt->execute(array_merge(array_values($data), array_values($where)));
     }
 }
-
-?>
