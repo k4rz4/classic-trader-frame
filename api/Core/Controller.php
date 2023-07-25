@@ -2,7 +2,6 @@
 
 namespace App\ClassicTrader\Core;
 
-use Psr\Http\Message\ResponseInterface;
 use App\ClassicTrader\Core\Logger;
 use App\ClassicTrader\Http\Response;
 
@@ -10,11 +9,14 @@ abstract class Controller
 {
     protected Logger $logger;
     protected Response $response;
+    protected Database $db;
 
-    public function __construct(Logger $logger, Response $response)
+    public function __construct(Logger $logger, Response $response, Database $db)
     {
         $this->logger = $logger;
         $this->response = $response;
+        $this->db = $db;
+
         $this->initialize();
     }
 
@@ -29,7 +31,7 @@ abstract class Controller
             ->withHeader('Content-Type', 'application/json')
             ->withBody(json_encode(['status' => $statusCode, 'data' => $data]));
 
-    return $this->response;
+        return $this->response;
     }
 
     protected function jsonSuccess($data): Response
