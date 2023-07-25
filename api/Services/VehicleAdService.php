@@ -27,7 +27,6 @@ class VehicleAdService extends Service
         $this->client = new HttpClient($this->logger);
     }
 
-   
     public function getVehicleAdDetails($id): array
     {
         $adModel = $this->callCTExternalApi($id);
@@ -45,5 +44,26 @@ class VehicleAdService extends Service
         $data = json_decode($response->getBody(), true)['data'];
 
         return $this->vehicleAdModel->getVehicleAdDetails($data);
+    }
+
+    public function sendMessage($id) 
+    {
+        $adModel = $this->callCTExternalApi($id);
+        $contactInfo = $adModel->contact;
+
+        //Pass to messaging service
+        return true;
+
+    }
+
+    public function saveBookmark($id)
+    {
+        //BookmarkModel->save($id, $user->id);
+        return true;
+    }
+
+    public function getAllBookmarks()
+    {
+        return true;
     }
 }
