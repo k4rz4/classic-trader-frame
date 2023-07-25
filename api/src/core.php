@@ -26,9 +26,8 @@ $logger = new Logger(__DIR__.'/../../logs/app.log', Level::Debug);
 
 $request = new Request();
 $response = new Response();
-$controllerFactory = new ControllerFactory($logger, $response);
+$controllerFactory = new ControllerFactory($logger, $response, $database);
 $router = new Router($request);
 $dispatcher = new Dispatcher($request, $router, $controllerFactory);
-
 
 return compact('database', 'logger', 'request', 'response','dispatcher');
