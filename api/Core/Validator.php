@@ -19,10 +19,10 @@ class Validator
 
     public function validateInteger($integer)
     {
-        if (!is_int($integer)) {
+        if (!is_numeric($integer) || floor($integer) != $integer) {
             throw new \InvalidArgumentException('Provided value is not an integer.');
         }
-
+    
         return true;
     }
 
