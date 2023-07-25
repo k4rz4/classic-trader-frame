@@ -32,7 +32,7 @@ class Request implements IRequest
         return $this->params;
     }
     
-    private function getParsedBody()
+    public function getParsedBody()
     {
         if ($this->method === 'POST') {
             $body = file_get_contents('php://input');

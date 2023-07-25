@@ -23,7 +23,7 @@ class Response
         }
         echo $this->body;
     }
-    
+
     public function getStatusCode(): int
     {
         return $this->statusCode;
