@@ -27,11 +27,9 @@ abstract class Controller
 
     protected function jsonResponse(array $data, int $statusCode = 200): Response
     {
-        $this->response = $this->response->withStatus($statusCode)
+        return $this->response->withStatus($statusCode)
             ->withHeader('Content-Type', 'application/json')
             ->withBody(json_encode(['status' => $statusCode, 'data' => $data]));
-
-        return $this->response;
     }
 
     protected function jsonSuccess($data): Response
