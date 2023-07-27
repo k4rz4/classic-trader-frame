@@ -46,9 +46,9 @@ class VehicleAdService extends Service
         return $this->vehicleAdModel->getVehicleAdDetails($data);
     }
 
-    public function sendMessage($id) 
+    public function sendMessage($request) 
     {
-        $adModel = $this->callCTExternalApi($id);
+        $adModel = $this->callCTExternalApi($request['id']);
         $contactInfo = $adModel->contact;
 
         //Pass to messaging service

@@ -30,8 +30,11 @@ class VehicleAdController extends Controller
         try {
 
             $id = $request->getParams()['id'];
-            $this->validator->validateInteger($id);
+            if (!$id) {
+                return $this->jsonError('Missing id parameter', 400);
+            }
 
+            $this->validator->validateInteger($id);
             $vehicleAdDetails = $this->vehicleAdService->getVehicleAdDetails($id);
 
             return $this->jsonSuccess($vehicleAdDetails);
@@ -79,13 +82,17 @@ class VehicleAdController extends Controller
         try {
 
             $this->validator->validateEmail($req['email']);
+        
+            if ($this->vehicleAdService->sendMessage($req)) {
+                return $this->jsonSuccess(['Message sent']);
+            } else {
+                return $this->jsonError('Message not sent', 500);
+            }
 
-            $this->vehicleAdService->sendMessage($req);
-
-            return $this->jsonSuccess('Message sent');
 
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+            var_dump($e->getMessage());
             return $this->jsonError($e->getMessage(), 500);
         }
 
@@ -101,9 +108,9 @@ class VehicleAdController extends Controller
             $this->validator->validateInteger($id);
 
             //pass auth->user so we can save to db 
-            $bookmark = $this->vehicleAdService->saveBookmark($id);
+            $this->vehicleAdService->saveBookmark($id);
 
-            return $this->jsonSuccess("Bookmark saved");
+            return $this->jsonSuccess(["Bookmark saved"]);
 
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
