@@ -92,7 +92,6 @@ class VehicleAdController extends Controller
 
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
-            var_dump($e->getMessage());
             return $this->jsonError($e->getMessage(), 500);
         }
 
