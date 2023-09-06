@@ -20,7 +20,8 @@ COPY . .
 # Set permissions for the working directory and its contents
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html
-
+#comment
 # Set permissions for .htaccess
 RUN chown www-data:www-data /var/www/html/api/.htaccess
 RUN chmod 644 /var/www/html/api/.htaccess
+
