@@ -1,5 +1,5 @@
 # ClassicTrader App
-
+----------
 This repository contains the ClassicTrader App, a web application built with vanilla PHP. This framework is a rework of a previous project [LogilotoGame](https://github.com/k4rz4/logilotto-game). This project is part of a technical interview process.
 
 ## Overview
